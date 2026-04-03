@@ -52,14 +52,9 @@ app.use("/api/comments", comments);
 // Central error handler
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5500;
 
-const server = app.listen(
-  PORT,
-  console.log(
-    `🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`,
-  ),
-);
+const server = app.listen(PORT, console.log(`http://localhost:${PORT}`));
 
 // Handle unhandled promise rejections Globally
 process.on("unhandledRejection", (err, promise) => {
