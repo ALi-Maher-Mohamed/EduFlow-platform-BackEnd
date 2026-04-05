@@ -2,14 +2,19 @@
  * Extract validation errors from Zod error object
  */
 const handleZodError = (err) => {
-  const errors = Object.values(err.errors).map((el) => el.message);
-  return {
-    message: "Invalid input data",
-    errors: errors,
-    statusCode: 400,
-  };
-};
+  const errors = err.issues
+    ? err.issues.map((issue) => {
+        return `${issue.path.join(".")} : ${issue.message}`;
+      })
+    : [err.message];
 
+  const message = `Invalid input data: ${errors.join(", ")}`;
+
+  const error = new Error(message);
+  error.statusCode = 400;
+  error.isOperational = true;
+  return error;
+};
 /**
  * Extract validation errors from Mongoose ValidationError
  */

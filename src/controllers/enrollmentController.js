@@ -84,45 +84,45 @@ exports.enrollCourse = asyncHandler(async (req, res, next) => {
  * @route   PATCH /api/enrollments/:enrollmentId/progress
  * @access  Private (Student)
  */
-exports.updateProgress = asyncHandler(async (req, res, next) => {
-  const { lessonId, completed } = req.body;
-  const enrollmentId = req.params.id;
+// src/controllers/enrollmentController.js
 
-  const enrollment = await Enrollment.findOne({
-    _id: enrollmentId,
-    student: req.user.id,
-  });
+exports.updateProgress = async (req, res, next) => {
+  try {
+    const { enrollmentId } = req.params;
+    const { lessonId, completed } = req.body;
 
-  if (!enrollment) {
-    return next(new ApiError(`Enrollment not found or not authorized`, 404));
-  }
+    const enrollment = await Enrollment.findById(enrollmentId);
 
-  const lesson = await Lesson.findById(lessonId);
-  if (!lesson || lesson.course.toString() !== enrollment.course.toString()) {
-    return next(new ApiError(`Invalid lesson for this course`, 400));
-  }
+    if (!enrollment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Enrollment not found" });
+    }
 
-  const lessonIndex = enrollment.progress.findIndex(
-    (p) => p.lesson.toString() === lessonId,
-  );
+    const progressIndex = enrollment.progress.findIndex(
+      (p) => p.lesson.toString() === lessonId,
+    );
 
-  if (lessonIndex === -1) {
-    enrollment.progress.push({
-      lesson: lessonId,
-      completed,
-      completedAt: completed ? new Date() : null,
+    if (progressIndex > -1) {
+      enrollment.progress[progressIndex].completed = completed;
+      enrollment.progress[progressIndex].completedAt = completed
+        ? Date.now()
+        : null;
+    } else {
+      enrollment.progress.push({
+        lesson: lessonId,
+        completed: completed,
+        completedAt: completed ? Date.now() : null,
+      });
+    }
+
+    await enrollment.save();
+
+    res.status(200).json({
+      success: true,
+      data: enrollment,
     });
-  } else {
-    enrollment.progress[lessonIndex].completed = completed;
-    enrollment.progress[lessonIndex].completedAt = completed
-      ? new Date()
-      : null;
+  } catch (error) {
+    next(error);
   }
-
-  await enrollment.save();
-
-  res.status(200).json({
-    success: true,
-    data: enrollment,
-  });
-});
+};
