@@ -368,6 +368,55 @@
               ]
             }
           }
+        },
+        {
+          "name": "Get Instructor Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/api/courses/instructor/dashboard",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "courses",
+                "instructor",
+                "dashboard"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Instructor Course Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/api/courses/instructor/courses/{{COURSE_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "courses",
+                "instructor",
+                "courses",
+                "{{COURSE_ID}}"
+              ]
+            }
+          }
         }
       ]
     },

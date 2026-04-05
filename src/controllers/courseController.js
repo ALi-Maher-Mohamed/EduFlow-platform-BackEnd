@@ -54,6 +54,54 @@ exports.getInstructorDashboard = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc    Get single course details for instructor (including enrolled students)
+ * @route   GET /api/courses/instructor/courses/:id
+ * @access  Private (Instructor)
+ */
+exports.getInstructorCourseDetails = asyncHandler(async (req, res, next) => {
+  const course = await Course.findById(req.params.id).populate({
+    path: "lessons",
+    select: "title order",
+    options: { sort: { order: 1 } },
+  });
+
+  if (!course) {
+    return next(
+      new ApiError(`Course not found with id of ${req.params.id}`, 404),
+    );
+  }
+
+  // Ensure current user is the instructor of the course
+  if (
+    course.instructor.toString() !== req.user.id &&
+    req.user.role !== "admin"
+  ) {
+    return next(
+      new ApiError(
+        `User ${req.user.id} is not authorized to view this course's details`,
+        403,
+      ),
+    );
+  }
+
+  // Get enrolled users with their progress
+  const enrollments = await Enrollment.find({ course: course._id })
+    .populate({
+      path: "student",
+      select: "name email avatar",
+    })
+    .select("-course");
+
+  res.status(200).json({
+    success: true,
+    data: {
+      course,
+      enrollments,
+    },
+  });
+});
+
+/**
  * @desc    Get single course by ID
  * @route   GET /api/courses/:id
  * @access  Public

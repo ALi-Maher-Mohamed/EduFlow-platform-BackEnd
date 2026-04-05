@@ -7,6 +7,7 @@ const {
   deleteCourse,
   rateCourse,
   getInstructorDashboard,
+  getInstructorCourseDetails,
 } = require("../controllers/courseController");
 
 const { protect } = require("../middleware/auth");
@@ -40,6 +41,10 @@ router
 router
   .route("/instructor/dashboard")
   .get(protect, authorize("instructor"), getInstructorDashboard);
+
+router
+  .route("/instructor/courses/:id")
+  .get(protect, authorize("instructor"), getInstructorCourseDetails);
 
 router
   .route("/:id")
