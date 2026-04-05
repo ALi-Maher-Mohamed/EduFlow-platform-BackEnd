@@ -19,12 +19,7 @@ router
 router.route("/my").get(protect, authorize("student"), getMyEnrollments);
 
 router
-  .route("/:enrollmentId/progress")
-  .patch(
-    protect,
-    authorize("student"),
-    validate(updateProgressSchema),
-    updateProgress,
-  );
+  .route("/:id/progress")
+  .patch(protect, authorize("student"), validate(updateProgressSchema), updateProgress);
 
 module.exports = router;

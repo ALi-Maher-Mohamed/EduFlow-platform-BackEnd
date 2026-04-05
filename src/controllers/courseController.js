@@ -13,11 +13,44 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
   const result = await paginateResults(
     Course,
     req.query,
-    ["title", "description", "category"], // Fields to text search
-    { path: "instructor", select: "name email" }, // Populate instructor
+    ["title", "description", "category"],
+    { path: "instructor", select: "name email" },
   );
 
   res.status(200).json(result);
+});
+
+/**
+ * @desc    Get instructor dashboard data (their courses with stats)
+ * @route   GET /api/courses/instructor/dashboard
+ * @access  Private (Instructor)
+ */
+exports.getInstructorDashboard = asyncHandler(async (req, res, next) => {
+  const courses = await Course.find({ instructor: req.user.id }).populate({
+    path: "lessons",
+    select: "title order",
+    options: { sort: { order: 1 } },
+  });
+
+  const totalStudents = courses.reduce(
+    (acc, course) => acc + (course.totalEnrollments || 0),
+    0,
+  );
+  const avgRatingOverall =
+    courses.length > 0
+      ? courses.reduce((acc, course) => acc + (course.averageRating || 0), 0) /
+        courses.length
+      : 0;
+
+  res.status(200).json({
+    success: true,
+    count: courses.length,
+    analytics: {
+      totalStudents,
+      overallRating: Math.round(avgRatingOverall * 10) / 10,
+    },
+    data: courses,
+  });
 });
 
 /**
@@ -55,12 +88,10 @@ exports.getCourse = asyncHandler(async (req, res, next) => {
  * @access  Private (Instructor only)
  */
 exports.createCourse = asyncHandler(async (req, res, next) => {
-  // Add user to req.body
   req.body.instructor = req.user.id;
 
-  // Check if file was uploaded
   if (req.file) {
-    req.body.thumbnail = req.file.path; // Cloudinary URL
+    req.body.thumbnail = req.file.path;
   }
 
   const course = await Course.create(req.body);
@@ -85,7 +116,6 @@ exports.updateCourse = asyncHandler(async (req, res, next) => {
     );
   }
 
-  // Make sure user is course owner
   if (
     course.instructor.toString() !== req.user.id &&
     req.user.role !== "admin"
@@ -98,9 +128,8 @@ exports.updateCourse = asyncHandler(async (req, res, next) => {
     );
   }
 
-  // Check if file was uploaded to update thumbnail
   if (req.file) {
-    req.body.thumbnail = req.file.path; // New Cloudinary URL
+    req.body.thumbnail = req.file.path;
   }
 
   course = await Course.findByIdAndUpdate(req.params.id, req.body, {
@@ -128,7 +157,6 @@ exports.deleteCourse = asyncHandler(async (req, res, next) => {
     );
   }
 
-  // Make sure user is course owner
   if (
     course.instructor.toString() !== req.user.id &&
     req.user.role !== "admin"
@@ -141,7 +169,7 @@ exports.deleteCourse = asyncHandler(async (req, res, next) => {
     );
   }
 
-  await course.deleteOne(); // Triggers pre-remove hooks if any
+  await course.deleteOne();
 
   res.status(200).json({
     success: true,
