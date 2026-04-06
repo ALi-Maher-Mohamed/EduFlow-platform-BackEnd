@@ -26,14 +26,29 @@ const app = express();
 // Security Middleware
 app.use(helmet());
 
+const allowedOrigins = [
+  "http://localhost:3000", // التطوير المحلي
+  "http://localhost:5173", // Vite (لو بتستخدمه)
+  "https://edu-flow1.netlify.app", // الـ frontend المستضاف
+  "https://your-frontend-domain.vercel.app", // لو حطيت frontend على Vercel
+];
 // Enable CORS
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "development"
-        ? "https://edu-flow1.netlify.app"
-        : "*",
-    credentials: true,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        console.log("Blocked origin:", origin);
+        callback(null, false); // أو callback(new Error('Not allowed by CORS'))
+      }
+    },
+    credentials: true, // مهم للـ cookies والتوكن
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
