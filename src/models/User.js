@@ -36,11 +36,11 @@ const userSchema = new mongoose.Schema(
     },
     profileImage: {
       type: String,
-      default: null, // Will store Cloudinary URL
+      default: null,
     },
     profileImagePublicId: {
       type: String,
-      default: null, // Store Cloudinary public_id for deletion/updates
+      default: null,
     },
   },
   {
