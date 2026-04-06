@@ -8,6 +8,8 @@ const {
   updateProfileImage,
   deleteProfileImage,
   updateProfile,
+  sendVerificationEmail,
+  verifyEmail,
   deleteAccount,
 } = require("../controllers/authController");
 const { protect } = require("../middleware/auth");
@@ -17,6 +19,7 @@ const uploadProfile = require("../middleware/uploadProfile");
 router.post("/register", uploadProfile.single("profileImage"), register);
 router.post("/login", login);
 router.post("/logout", logout);
+router.get("/verify-email/:token", verifyEmail);
 
 // Private routes (require authentication)
 router.get("/me", protect, getMe);
@@ -29,5 +32,6 @@ router.put(
 );
 router.delete("/profile/image", protect, deleteProfileImage);
 router.delete("/profile", protect, deleteAccount);
+router.post("/send-verification-email", protect, sendVerificationEmail);
 
 module.exports = router;
