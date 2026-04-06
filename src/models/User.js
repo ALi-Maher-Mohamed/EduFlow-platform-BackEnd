@@ -34,6 +34,14 @@ const userSchema = new mongoose.Schema(
       enum: ["student", "instructor"],
       default: "student",
     },
+    profileImage: {
+      type: String,
+      default: null, // Will store Cloudinary URL
+    },
+    profileImagePublicId: {
+      type: String,
+      default: null, // Store Cloudinary public_id for deletion/updates
+    },
   },
   {
     timestamps: true,
