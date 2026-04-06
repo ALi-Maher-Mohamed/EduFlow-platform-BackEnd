@@ -42,6 +42,28 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    // ✅ إضافة حقول التحقق من البريد
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationToken: {
+      type: String,
+      default: null,
+    },
+    emailVerificationExpires: {
+      type: Date,
+      default: null,
+    },
+    // ✅ إضافة حقل إعادة تعيين كلمة المرور
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
