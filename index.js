@@ -4,7 +4,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
-const errorHandler = require("./middleware/errorHandler");
+const errorHandler = require("./src/middleware/errorHandler");
 
 // ✅ 1. First, define connectDB
 const mongoose = require("mongoose");
@@ -19,7 +19,6 @@ const connectDB = async () => {
   }
 };
 
-// ✅ 2. Then call it
 connectDB();
 
 const app = express();
@@ -48,11 +47,16 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // Route files
-const auth = require("./routes/authRoutes");
-const courses = require("./routes/courseRoutes");
-const lessons = require("./routes/lessonRoutes");
-const enrollments = require("./routes/enrollmentRoutes");
-const comments = require("./routes/commentRoutes");
+const auth = require("./src/routes/authRoutes");
+const courses = require("./src/routes/courseRoutes");
+const lessons = require("./src/routes/lessonRoutes");
+const enrollments = require("./src/routes/enrollmentRoutes");
+const comments = require("./src/routes/commentRoutes");
+
+// test route
+app.get("/", (req, res) => {
+  res.send("EduFlow API is running!");
+});
 
 // Mount routers
 app.use("/api/auth", auth);

@@ -4,8 +4,8 @@
   "description": "EduFlow - Online Learning Platform Backend API",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon server",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "seed": "node src/scripts/seed.js"
   },
   "keywords": [
@@ -16,6 +16,10 @@
     "mongodb"
   ],
   "author": "",
+  
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.3",
