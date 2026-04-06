@@ -22,6 +22,11 @@ const courseSchema = new mongoose.Schema(
       type: String, // Cloudinary URL
       default: "",
     },
+    thumbnailPublicId: {
+      // ✅ أضف هذا الحقل
+      type: String,
+      default: null,
+    },
     category: {
       type: String,
       required: [true, "Category is required"],

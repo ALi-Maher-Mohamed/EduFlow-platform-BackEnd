@@ -110,7 +110,7 @@ exports.getCourse = asyncHandler(async (req, res, next) => {
   const course = await Course.findById(req.params.id)
     .populate({
       path: "instructor",
-      select: "name email",
+      select: "name email profileImage",
     })
     .populate({
       path: "lessons",

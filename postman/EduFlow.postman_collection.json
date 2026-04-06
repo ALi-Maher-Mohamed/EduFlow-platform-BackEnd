@@ -9,56 +9,88 @@
       "name": "Auth",
       "item": [
         {
-          "name": "Register Instructor",
+          "name": "Register Student (with optional profile image)",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [],
             "body": {
-              "mode": "raw",
-              "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@eduflow.com\",\n    \"password\": \"password123\",\n    \"role\": \"instructor\"\n}"
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Jane Student",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "jane@eduflow.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password123",
+                  "type": "text"
+                },
+                {
+                  "key": "role",
+                  "value": "student",
+                  "type": "text"
+                },
+                {
+                  "key": "profileImage",
+                  "type": "file",
+                  "src": [],
+                  "disabled": true
+                }
+              ]
             },
             "url": {
               "raw": "{{URL}}/api/auth/register",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "register"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "auth", "register"]
             }
           }
         },
         {
-          "name": "Register Student",
+          "name": "Register Instructor (with optional profile image)",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [],
             "body": {
-              "mode": "raw",
-              "raw": "{\n    \"name\": \"Jane Student\",\n    \"email\": \"jane@eduflow.com\",\n    \"password\": \"password123\",\n    \"role\": \"student\"\n}"
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "John Instructor",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "john@eduflow.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password123",
+                  "type": "text"
+                },
+                {
+                  "key": "role",
+                  "value": "instructor",
+                  "type": "text"
+                },
+                {
+                  "key": "profileImage",
+                  "type": "file",
+                  "src": [],
+                  "disabled": true
+                }
+              ]
             },
             "url": {
               "raw": "{{URL}}/api/auth/register",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "register"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "auth", "register"]
             }
           }
         },
@@ -72,6 +104,7 @@
                   "const response = pm.response.json();",
                   "if(response.success) {",
                   "    pm.environment.set(\"TOKEN\", response.token);",
+                  "    pm.environment.set(\"USER_ID\", response.user._id);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -92,19 +125,13 @@
             },
             "url": {
               "raw": "{{URL}}/api/auth/login",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "auth", "login"]
             }
           }
         },
         {
-          "name": "Get Me",
+          "name": "Get Current User (Me)",
           "request": {
             "method": "GET",
             "header": [
@@ -115,14 +142,94 @@
             ],
             "url": {
               "raw": "{{URL}}/api/auth/me",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "me"
+              "host": ["{{URL}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile (Name only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"John Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{URL}}/api/auth/profile",
+              "host": ["{{URL}}"],
+              "path": ["api", "auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Upload Profile Image",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "profileImage",
+                  "type": "file",
+                  "src": []
+                }
               ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/auth/profile/image",
+              "host": ["{{URL}}"],
+              "path": ["api", "auth", "profile", "image"]
+            }
+          }
+        },
+        {
+          "name": "Delete Profile Image",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/api/auth/profile/image",
+              "host": ["{{URL}}"],
+              "path": ["api", "auth", "profile", "image"]
+            }
+          }
+        },
+        {
+          "name": "Delete Account (⚠️ Permanent - Deletes all data)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/api/auth/profile",
+              "host": ["{{URL}}"],
+              "path": ["api", "auth", "profile"]
             }
           }
         },
@@ -130,17 +237,16 @@
           "name": "Logout",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
             "url": {
               "raw": "{{URL}}/api/auth/logout",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "logout"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "auth", "logout"]
             }
           }
         }
@@ -156,67 +262,27 @@
             "header": [],
             "url": {
               "raw": "{{URL}}/api/courses?page=1&limit=10&sort=newest",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "courses"
-              ],
+              "host": ["{{URL}}"],
+              "path": ["api", "courses"],
               "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "limit",
-                  "value": "10"
-                },
-                {
-                  "key": "sort",
-                  "value": "newest",
-                  "description": "newest | popular | rating"
-                },
-                {
-                  "key": "search",
-                  "value": "react",
-                  "disabled": true
-                },
-                {
-                  "key": "category",
-                  "value": "web-development",
-                  "disabled": true
-                }
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "sort", "value": "newest", "description": "newest | popular | rating" },
+                { "key": "search", "value": "react", "disabled": true },
+                { "key": "category", "value": "web-development", "disabled": true }
               ]
             }
           }
         },
         {
           "name": "Get Single Course",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
           "request": {
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{URL}}/api/courses/{{COURSE_ID}}",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "courses",
-                "{{COURSE_ID}}"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "courses", "{{COURSE_ID}}"]
             }
           }
         },
@@ -247,37 +313,16 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                {
-                  "key": "title",
-                  "value": "Complete React Guide",
-                  "type": "text"
-                },
-                {
-                  "key": "description",
-                  "value": "Learn React from scratch with hooks, routing, and state management",
-                  "type": "text"
-                },
-                {
-                  "key": "category",
-                  "value": "web-development",
-                  "type": "text"
-                },
-                {
-                  "key": "thumbnail",
-                  "type": "file",
-                  "src": []
-                }
+                { "key": "title", "value": "Complete React Guide", "type": "text" },
+                { "key": "description", "value": "Learn React from scratch with hooks, routing, and state management", "type": "text" },
+                { "key": "category", "value": "web-development", "type": "text" },
+                { "key": "thumbnail", "type": "file", "src": [], "disabled": true }
               ]
             },
             "url": {
               "raw": "{{URL}}/api/courses",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "courses"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "courses"]
             }
           }
         },
@@ -294,23 +339,13 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                {
-                  "key": "title",
-                  "value": "Complete React Guide (Updated)",
-                  "type": "text"
-                }
+                { "key": "title", "value": "Complete React Guide (Updated)", "type": "text" }
               ]
             },
             "url": {
               "raw": "{{URL}}/api/courses/{{COURSE_ID}}",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "courses",
-                "{{COURSE_ID}}"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "courses", "{{COURSE_ID}}"]
             }
           }
         },
@@ -326,14 +361,8 @@
             ],
             "url": {
               "raw": "{{URL}}/api/courses/{{COURSE_ID}}",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "courses",
-                "{{COURSE_ID}}"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "courses", "{{COURSE_ID}}"]
             }
           }
         },
@@ -357,15 +386,8 @@
             },
             "url": {
               "raw": "{{URL}}/api/courses/{{COURSE_ID}}/rate",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "courses",
-                "{{COURSE_ID}}",
-                "rate"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "courses", "{{COURSE_ID}}", "rate"]
             }
           }
         },
@@ -381,15 +403,8 @@
             ],
             "url": {
               "raw": "{{URL}}/api/courses/instructor/dashboard",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "courses",
-                "instructor",
-                "dashboard"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "courses", "instructor", "dashboard"]
             }
           }
         },
@@ -405,16 +420,8 @@
             ],
             "url": {
               "raw": "{{URL}}/api/courses/instructor/courses/{{COURSE_ID}}",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "courses",
-                "instructor",
-                "courses",
-                "{{COURSE_ID}}"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "courses", "instructor", "courses", "{{COURSE_ID}}"]
             }
           }
         }
@@ -430,15 +437,8 @@
             "header": [],
             "url": {
               "raw": "{{URL}}/api/courses/{{COURSE_ID}}/lessons",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "courses",
-                "{{COURSE_ID}}",
-                "lessons"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "courses", "{{COURSE_ID}}", "lessons"]
             }
           }
         },
@@ -476,15 +476,8 @@
             },
             "url": {
               "raw": "{{URL}}/api/courses/{{COURSE_ID}}/lessons",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "courses",
-                "{{COURSE_ID}}",
-                "lessons"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "courses", "{{COURSE_ID}}", "lessons"]
             }
           }
         },
@@ -495,14 +488,8 @@
             "header": [],
             "url": {
               "raw": "{{URL}}/api/lessons/{{LESSON_ID}}",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "lessons",
-                "{{LESSON_ID}}"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "lessons", "{{LESSON_ID}}"]
             }
           }
         }
@@ -545,13 +532,8 @@
             },
             "url": {
               "raw": "{{URL}}/api/enrollments",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "enrollments"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "enrollments"]
             }
           }
         },
@@ -567,23 +549,11 @@
             ],
             "url": {
               "raw": "{{URL}}/api/enrollments/my?page=1&limit=5",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "enrollments",
-                "my"
-              ],
+              "host": ["{{URL}}"],
+              "path": ["api", "enrollments", "my"],
               "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "limit",
-                  "value": "5"
-                }
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "5" }
               ]
             }
           }
@@ -608,15 +578,8 @@
             },
             "url": {
               "raw": "{{URL}}/api/enrollments/{{ENROLLMENT_ID}}/progress",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "enrollments",
-                "{{ENROLLMENT_ID}}",
-                "progress"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "enrollments", "{{ENROLLMENT_ID}}", "progress"]
             }
           }
         }
@@ -632,15 +595,8 @@
             "header": [],
             "url": {
               "raw": "{{URL}}/api/lessons/{{LESSON_ID}}/comments",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "lessons",
-                "{{LESSON_ID}}",
-                "comments"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "lessons", "{{LESSON_ID}}", "comments"]
             }
           }
         },
@@ -664,49 +620,27 @@
             },
             "url": {
               "raw": "{{URL}}/api/lessons/{{LESSON_ID}}/comments",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "lessons",
-                "{{LESSON_ID}}",
-                "comments"
-              ]
+              "host": ["{{URL}}"],
+              "path": ["api", "lessons", "{{LESSON_ID}}", "comments"]
             }
           }
         }
       ]
     }
   ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          ""
-        ]
-      }
-    },
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          ""
-        ]
-      }
-    }
-  ],
   "variable": [
     {
       "key": "URL",
-      "value": "http://localhost:5000",
+      "value": "http://localhost:5500",
       "type": "string"
     },
     {
       "key": "TOKEN",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "USER_ID",
       "value": "",
       "type": "string"
     },

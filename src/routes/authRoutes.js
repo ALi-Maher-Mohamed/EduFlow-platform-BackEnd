@@ -3,16 +3,31 @@ const router = express.Router();
 const {
   register,
   login,
-  logout,
   getMe,
+  logout,
+  updateProfileImage,
+  deleteProfileImage,
+  updateProfile,
+  deleteAccount,
 } = require("../controllers/authController");
-const validate = require("../middleware/validate");
-const { registerSchema, loginSchema } = require("../utils/validators");
 const { protect } = require("../middleware/auth");
+const uploadProfile = require("../middleware/uploadProfile");
 
-router.post("/register", validate(registerSchema), register);
-router.post("/login", validate(loginSchema), login);
-router.get("/me", protect, getMe);
+// Public routes
+router.post("/register", uploadProfile.single("profileImage"), register);
+router.post("/login", login);
 router.post("/logout", logout);
+
+// Private routes (require authentication)
+router.get("/me", protect, getMe);
+router.put("/profile", protect, updateProfile);
+router.put(
+  "/profile/image",
+  protect,
+  uploadProfile.single("profileImage"),
+  updateProfileImage,
+);
+router.delete("/profile/image", protect, deleteProfileImage);
+router.delete("/profile", protect, deleteAccount);
 
 module.exports = router;
