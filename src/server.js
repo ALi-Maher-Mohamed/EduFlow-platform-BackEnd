@@ -4,10 +4,22 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
-const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
 
-// Connect to Database
+// ✅ 1. First, define connectDB
+const mongoose = require("mongoose");
+
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error(`❌ MongoDB Connection Error: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+// ✅ 2. Then call it
 connectDB();
 
 const app = express();
@@ -54,7 +66,10 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5500;
 
-const server = app.listen(PORT, console.log(`http://localhost:${PORT}`));
+const server = app.listen(
+  PORT,
+  console.log(`Server is running on port ${PORT}`),
+);
 
 // Handle unhandled promise rejections Globally
 process.on("unhandledRejection", (err, promise) => {

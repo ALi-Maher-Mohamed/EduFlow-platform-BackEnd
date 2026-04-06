@@ -7,70 +7,84 @@ const Lesson = require("../models/Lesson");
 const Enrollment = require("../models/Enrollment");
 const Comment = require("../models/Comment");
 
+// ✅ تأكد من الـ URI
+console.log("🔗 Connecting to:", process.env.MONGO_URI);
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI);
 
+// ✅ Listeners
+mongoose.connection.on("connected", () => {
+  console.log("✅ MongoDB Connected");
+});
+mongoose.connection.on("error", (err) => {
+  console.error("❌ MongoDB Error:", err.message);
+  process.exit(1);
+});
+
 const seedData = async () => {
   try {
-    // Determine if we need to clear data first
     if (process.argv[2] === "-i" || process.argv[2] === "--import") {
       // Clear all existing data
-      console.log("Destorying existing data...");
+      console.log("🗑️ Destroying existing data...");
       await User.deleteMany();
       await Course.deleteMany();
       await Lesson.deleteMany();
       await Enrollment.deleteMany();
       await Comment.deleteMany();
 
-      console.log("Generating fresh data...");
+      console.log("📦 Generating fresh data...");
+
+      // ✅ توحيد الباسوردات
       const salt = await bcrypt.genSalt(10);
-      const password = await bcrypt.hash("password123", salt);
+      const hashedPassword = await bcrypt.hash("password123", salt);
 
       // 1. Create Users (2 Instructors + 5 Students)
       const users = await User.create([
         {
           name: "John Instructor",
-          email: "auth1@eduflow.com",
-          password: password,
+          email: "john@eduflow.com",
+          password: hashedPassword,
           role: "instructor",
         },
         {
           name: "Jane Teacher",
-          email: "auth2@eduflow.com",
-          password: password,
+          email: "jane@eduflow.com",
+          password: hashedPassword,
           role: "instructor",
         },
         {
           name: "Alice Student",
-          email: "student1@eduflow.com",
-          password: password,
+          email: "alice@eduflow.com",
+          password: hashedPassword,
           role: "student",
         },
         {
           name: "Bob Student",
-          email: "student2@eduflow.com",
-          password: password,
+          email: "bob@eduflow.com",
+          password: hashedPassword,
           role: "student",
         },
         {
           name: "Charlie Student",
-          email: "student3@eduflow.com",
-          password: password,
+          email: "charlie@eduflow.com",
+          password: hashedPassword,
           role: "student",
         },
         {
           name: "Diana Student",
-          email: "student4@eduflow.com",
-          password: password,
+          email: "diana@eduflow.com",
+          password: hashedPassword,
           role: "student",
         },
         {
           name: "Evan Student",
-          email: "student5@eduflow.com",
-          password: password,
+          email: "evan@eduflow.com",
+          password: hashedPassword,
           role: "student",
         },
       ]);
+
       const instructors = [users[0], users[1]];
       const students = users.slice(2);
       console.log("✅ Users created");
@@ -111,12 +125,11 @@ const seedData = async () => {
 
       const courses = [];
       for (let i = 0; i < coursesData.length; i++) {
-        courses.push(
-          await Course.create({
-            ...coursesData[i],
-            instructor: instructors[i % 2]._id, // Alternate instructors
-          }),
-        );
+        const course = await Course.create({
+          ...coursesData[i],
+          instructor: instructors[i % 2]._id,
+        });
+        courses.push(course);
       }
       console.log("✅ Courses created");
 
@@ -124,23 +137,21 @@ const seedData = async () => {
       const lessons = [];
       for (const course of courses) {
         for (let j = 1; j <= 3; j++) {
-          lessons.push(
-            await Lesson.create({
-              title: `Lesson ${j} for ${course.title}`,
-              content: `This is the comprehensive content for lesson ${j}. It covers all the fundamentals.`,
-              videoUrl: `https://youtube.com/watch?v=sample${j}`,
-              order: j,
-              course: course._id,
-            }),
-          );
+          const lesson = await Lesson.create({
+            title: `Lesson ${j}: ${course.title.split(" ")[0]} Fundamentals`,
+            content: `This is the comprehensive content for lesson ${j}. It covers all the fundamentals of ${course.title}.`,
+            videoUrl: `https://www.youtube.com/embed/dQw4w9WgXcQ`,
+            order: j,
+            course: course._id,
+          });
+          lessons.push(lesson);
         }
       }
       console.log("✅ Lessons created");
 
       // 4. Create Enrollments and Progress
       for (const student of students) {
-        // Enroll each student in 2 random courses
-        const shuffledCourses = courses.sort(() => 0.5 - Math.random());
+        const shuffledCourses = [...courses].sort(() => 0.5 - Math.random());
         const enrolledCourses = shuffledCourses.slice(0, 2);
 
         for (const course of enrolledCourses) {
@@ -149,7 +160,7 @@ const seedData = async () => {
           );
           const progress = courseLessons.map((l, index) => ({
             lesson: l._id,
-            completed: index === 0, // Complete only first lesson
+            completed: index === 0,
             completedAt: index === 0 ? new Date() : null,
           }));
 
@@ -167,21 +178,18 @@ const seedData = async () => {
 
       // 5. Create Comments and Ratings
       for (const course of courses) {
-        // Find enrolled students
         const enrollments = await Enrollment.find({ course: course._id });
         const enrolledStudents = enrollments.map((e) => e.student);
 
         if (enrolledStudents.length > 0) {
-          // Add a rating from the first enrolled student
           course.ratings.push({
             user: enrolledStudents[0],
-            rating: 4 + Math.floor(Math.random() * 2), // 4 or 5
+            rating: 4 + Math.floor(Math.random() * 2),
             review: "Great course, highly recommended!",
           });
           course.calculateAverageRating();
           await course.save();
 
-          // Add a comment to the first lesson
           const firstLesson = lessons.find(
             (l) =>
               l.course.toString() === course._id.toString() && l.order === 1,
@@ -197,23 +205,31 @@ const seedData = async () => {
       }
       console.log("✅ Comments and Ratings created");
 
-      console.log("Data Imported! 🚀");
-      process.exit();
+      console.log("\n🎉 Data Imported Successfully!");
+      console.log("\n📋 Login Credentials (All users):");
+      console.log(
+        "Email: any of john@eduflow.com, jane@eduflow.com, alice@eduflow.com, etc.",
+      );
+      console.log("Password: password123");
+
+      process.exit(0);
     } else if (process.argv[2] === "-d" || process.argv[2] === "--destroy") {
-      console.log("Destorying existing data...");
+      console.log("🗑️ Destroying existing data...");
       await User.deleteMany();
       await Course.deleteMany();
       await Lesson.deleteMany();
       await Enrollment.deleteMany();
       await Comment.deleteMany();
-      console.log("Data Destroyed! 🗑️");
-      process.exit();
+      console.log("✅ Data Destroyed!");
+      process.exit(0);
     } else {
-      console.log("Please provide a flag: -i to import, -d to destroy");
+      console.log("Please provide a flag:");
+      console.log("  -i or --import  : Import seed data");
+      console.log("  -d or --destroy : Destroy all data");
       process.exit(1);
     }
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+    console.error(`❌ Error: ${error.message}`);
     process.exit(1);
   }
 };
