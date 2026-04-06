@@ -30,7 +30,9 @@ app.use(helmet());
 app.use(
   cors({
     origin:
-      process.env.NODE_ENV === "development" ? "http://localhost:3000" : "*",
+      process.env.NODE_ENV === "development"
+        ? "https://edu-flow1.netlify.app"
+        : "*",
     credentials: true,
   }),
 );
